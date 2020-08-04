@@ -1,0 +1,37 @@
+<launch>
+  <arg name="rvizconfig" default="$(find diff_drive)/rviz/urdf.rviz" />
+  <arg name="model" default="$(find diff_drive)/urdf/diff_drive.urdf"/>
+  <arg name="gui" default="true" />
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+  
+   
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="recording" value="false"/>
+    <arg name="debug" value="false"/>
+  </include> 
+  <node name="spawn_urdf_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find diff_drive)/urdf/diff_drive.urdf -urdf -z 1 -model diff_drive" />
+
+  
+  
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" ns="/diff_drive" args="left_wheel_velocity_controller right_wheel_velocity_controller joint_state_controller"/>
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find diff_drive)/config/wheel_control.yaml" command="load"/>
+
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+    respawn="false" output="screen">
+    <remap from="/joint_states" to="/diff_drive/joint_states" />
+  </node>
+
+  <node name="spawner" pkg="diff_drive" type="spawner"/>
+
+  
+</launch>

@@ -1,0 +1,11 @@
+diff_drive:
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+  
+  left_wheel_velocity_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: chassis_to_left_wheel
+  right_wheel_velocity_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: chassis_to_right_wheel
